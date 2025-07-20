@@ -5,7 +5,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { RolesModule } from './roles/roles.module';
+import { DepartmentsModule } from './departments/departments.module';
 import * as Joi from 'joi';
+
+import { databaseConfig } from './config/database.config';
 
 @Module({
   imports: [
@@ -17,29 +21,23 @@ import * as Joi from 'joi';
         DB_USERNAME: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
-        JWT_SECRET: Joi.string().required(),
+        JWT_SECRET: Joi.string().min(32).required(),
         APP_PORT: Joi.number().default(3000),
         CORS_ORIGIN: Joi.string().required(),
+        NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
       }),
     }),
 
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        type: 'mysql',
-        host: configService.get<string>('DB_HOST'),
-        port: configService.get<number>('DB_PORT'),
-        username: configService.get<string>('DB_USERNAME'),
-        password: configService.get<string>('DB_PASSWORD'),
-        database: configService.get<string>('DB_NAME'),
-        autoLoadEntities: true,
-        synchronize: true, // ⚠️ Solo para desarrollo
-      }),
+      useFactory: databaseConfig,
     }),
 
     AuthModule,
     UsersModule,
+    RolesModule,
+    DepartmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

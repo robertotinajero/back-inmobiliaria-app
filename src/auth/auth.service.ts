@@ -1,35 +1,29 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string) {
+  async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
-    if (!user) throw new UnauthorizedException('Usuario no encontrado');
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) throw new UnauthorizedException('Credenciales inválidas');
-
-    const { password: _, ...result } = user;
-    return result;
+    if (user && await bcrypt.compare(password, user.password)) {
+      const { password, ...result } = user;
+      return result; // aquí ya trae el role por la relación cargada
+    }
+    return null;
   }
 
-   async login(user: any) {
-    const payload = { sub: user.id, email: user.email };
+  async login(user: any) {
+    const payload = { sub: user.id_user, email: user.email };
     return {
       access_token: this.jwtService.sign(payload),
-      user,
+      user, // incluye el role porque ya viene con la relación
     };
-  }
-
-  async register(email: string, password: string) {
-    return this.usersService.create(email, password);
   }
 }

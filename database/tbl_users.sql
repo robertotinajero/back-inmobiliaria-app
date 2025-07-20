@@ -12,7 +12,7 @@ CREATE TABLE tbl_users (
     id_department INT NOT NULL,
     fg_active	INT(11) DEFAULT 1,
     id_user_last_modification varchar(255) DEFAULT NULL,
-    dt_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    FOREIGN KEY (id_role) REFERENCES pena_roles(id_role),
-    FOREIGN KEY (id_department) REFERENCES pena_departments(id_department)
+    dt_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_role) REFERENCES tbl_roles(id_role),
+    FOREIGN KEY (id_department) REFERENCES tbl_departments(id_department)
 );

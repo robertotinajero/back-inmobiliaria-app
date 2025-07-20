@@ -6,15 +6,28 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(User) private repo: Repository<User>) {}
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) { }
+
 
   async create(email: string, password: string) {
     const hash = await bcrypt.hash(password, 10);
-    const user = this.repo.create({ email, password: hash });
-    return this.repo.save(user);
+    const user = this.userRepository.create({ email, password: hash });
+    return this.userRepository.save(user);
   }
 
   async findByEmail(email: string) {
-    return this.repo.findOne({ where: { email } });
+    return this.userRepository.findOne({
+      where: { email },
+      relations: ['role', 'department'],
+    });
+  }
+
+  async findAllWithRelations(): Promise<User[]> {
+    return this.userRepository.find({
+      relations: ['role', 'department'],
+    });
   }
 }
