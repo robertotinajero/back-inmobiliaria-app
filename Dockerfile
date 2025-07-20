@@ -1,26 +1,30 @@
-# Etapa de build
+# Etapa de construcción
 FROM node:18-alpine AS builder
 
+# Establece el directorio de trabajo
 WORKDIR /app
 
+# Copia los archivos necesarios
 COPY package*.json ./
-RUN npm install --omit=dev
+COPY tsconfig*.json ./
+COPY ./src ./src
 
-COPY . .
+# Instala dependencias de producción y build
+RUN npm install --omit=dev && npm run build
 
-RUN npm run build
-
-# Etapa de producción
+# Etapa final
 FROM node:18-alpine
 
+# Crea el directorio de la app
 WORKDIR /app
 
-# Solo copiamos lo necesario para producción
+# Copia desde la etapa anterior
+COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package*.json ./
 
-ENV NODE_ENV=production
+# Expone el puerto NestJS (por defecto 3000)
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
+# Comando para arrancar la app
+CMD ["node", "dist/main"]
