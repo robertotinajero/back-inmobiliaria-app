@@ -5,6 +5,7 @@ import { Role } from '../roles/role.entity';
 import { Department } from '../departments/department.entity';
 
 export const databaseConfig = async (configService: ConfigService,): Promise<TypeOrmModuleOptions> => ({
+  name: 'default', // ✅ Esto previene el uso de crypto.randomUUID()
   type: 'mysql' as const,
   host: configService.get<string>('DB_HOST'),
   port: configService.get<number>('DB_PORT'),
