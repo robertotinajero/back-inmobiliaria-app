@@ -2,11 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import * as nodeCrypto from 'crypto';
+import { randomUUID } from 'crypto';
 
 
 async function bootstrap() {
   if (!globalThis.crypto) {
-    (globalThis as any).crypto = nodeCrypto.webcrypto;
+    globalThis.crypto = {
+      randomUUID,
+    } as any;
   }
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
