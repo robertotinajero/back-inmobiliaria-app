@@ -1,8 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
+import * as nodeCrypto from 'crypto';
+
 
 async function bootstrap() {
+  if (!globalThis.crypto) {
+    (globalThis as any).crypto = nodeCrypto.webcrypto;
+  }
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
 
